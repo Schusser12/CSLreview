@@ -16,8 +16,8 @@ if ! ls access_log* >/dev/null 2>&1; then
     exit 1
 fi
 
-echo -e "${txtpur}Consolidating all the log files into one: compute_log.txt\n${txtwht}"
-zcat access_log* > compute_log.txt
+echo -e "${txtpur}Consolidating all the log files into one: cc_log.txt\n${txtwht}"
+zcat access_log* > cc_log.txt
 
 # Function to get top hits with error handling
 function top_hitters {
@@ -25,10 +25,10 @@ function top_hitters {
     eval "$2 | sort | uniq -c | sort -rn | head -10" 2>/dev/null
 }
 
-top_hitters "top-hitting IPs:\n" "awk '{print \$1}' compute_log.txt"
-top_hitters "top requests:\n" "tr '\"' '\n' < compute_log.txt | grep HTTP | awk '{print \$1 \" \" \$2}' | cut -d'?' -f1"
-top_hitters "top-hitting user agents:\n" "cut -d'\"' -f6 compute_log.txt"
-top_hitters "outdated browser User-agents:\n" "grep 'Chrome/[2-9]\\|Firefox/[2-9]\\|Mozilla/4' compute_log.txt | cut -d'\"' -f6"
-top_hitters "bot user-agents:\n" "grep -i 'bot' compute_log.txt | cut -d'\"' -f6"
+top_hitters "top-hitting IPs:\n" "awk '{print \$1}' cc_log.txt"
+top_hitters "top requests:\n" "tr '\"' '\n' < cc_log.txt | grep HTTP | awk '{print \$1 \" \" \$2}' | cut -d'?' -f1"
+top_hitters "top-hitting user agents:\n" "cut -d'\"' -f6 cc_log.txt"
+top_hitters "outdated browser User-agents:\n" "grep 'Chrome/[2-9]\\|Firefox/[2-9]\\|Mozilla/4' cc_log.txt | cut -d'\"' -f6"
+top_hitters "bot user-agents:\n" "grep -i 'bot' cc_log.txt | cut -d'\"' -f6"
 
-rm compute_log.txt # Clean up temporary log file
+rm cc_log.txt # Clean up temporary log file
