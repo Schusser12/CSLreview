@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Check for log files existence
+if ! ls access_log* >/dev/null 2>&1; then
+    echo "No log files found!"
+    exit 1
+fi
+
+echo "Consolidating all the log files into one: compute_log.txt"
+zcat access_log* > compute_log.txt
+
+# Function to get top hits with error handling
+function top_hitters {
+    echo -e "Reviewing $1:"
+    eval "$2 | sort | uniq -c | sort -rn | head -10" 2>/dev/null
+}
+
+top_hitters "top-hitting IPs" "awk '{print \$1}' compute_log.txt"
+top_hitters "top requests" "tr '\"' '\n' < compute_log.txt | grep HTTP | awk '{print \$1 \" \" \$2}' | cut -d'?' -f1"
+top_hitters "top-hitting user agents" "cut -d'\"' -f6 compute_log.txt"
+top_hitters "outdated browser User-agents" "grep 'Chrome/[2-9]\\|Firefox/[2-9]\\|Mozilla/4' compute_log.txt | cut -d'\"' -f6"
+top_hitters "bot user-agents" "grep -i 'bot' compute_log.txt | cut -d'\"' -f6"
+
+rm compute_log.txt # Clean up temporary file
